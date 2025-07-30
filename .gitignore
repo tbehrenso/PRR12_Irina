@@ -1,0 +1,12 @@
+.Rhistory
+.Rproj.user/
+Results
+data
+
+*.pptx
+*.png
+*.csv
+*.RData
+*.xlsx
+*.html
+*.Rproj
