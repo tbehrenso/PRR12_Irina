@@ -109,7 +109,7 @@ EnhancedVolcano(res_KO_WT,
                 subtitle = NULL)
 
 # Plot gene
-GENE_OF_INTEREST <- 'CDC25C'
+GENE_OF_INTEREST <- 'BCL2L11'
 
 plot_data <- plotCounts(dds, gene=GENE_OF_INTEREST, intgroup=c("Condition",'CellType'), 
                 returnData=TRUE)
@@ -220,6 +220,7 @@ barplot(kegg_res, showCategory = 20) + ggtitle(paste0(CELL_TYPE, ' - ', MUTANT_T
 # --------------------------------
 # GSEA 
 # --------------------------------
+library(enrichplot)
 
 logfc_list <- res_of_interest$log2FoldChange
 names(logfc_list) <- res_of_interest$X
@@ -232,16 +233,19 @@ gse <- gseGO(geneList = logfc_list,
              keyType = 'SYMBOL'
 )
 
-dotplot(gse, showCategory=15, split=".sign") +  
+gse_simplified <- clusterProfiler::simplify(gse, cutoff=0.7, by="p.adjust", select_fun=min)
+
+dotplot(gse_simplified, showCategory=15, split=".sign") +  
   theme(text=element_text(size=24), axis.text.x = element_text(size=24), axis.text.y = element_text(size=24), axis.title.x = element_text(size=24)) + 
   scale_y_discrete(labels=function(x) str_wrap(x, width=80)) +
   scale_size_area(max_size = 10) + 
   ggtitle(paste0('GSEA ', CELL_TYPE, ': ', MUTANT_TYPE, ' vs WT ')) + facet_grid(.~.sign)
 
 
-emapplot(gse, showCategory = 10)
+gse_sim <- pairwise_termsim(gse_simplified)
+emapplot(gse_sim, showCategory = 100, color='p.adjust')  # color by p.adjust or NES
 
-cnetplot(gse, categorySize="pvalue", foldChange=logfc_list, showCategory = 3)
+cnetplot(gse_simplified, categorySize="p.adjust", foldChange=logfc_list, showCategory = 5)
 
 ridgeplot(gse) + labs(x = "enrichment distribution")
 

@@ -1,0 +1,2 @@
+
+python /dexseq_count.py ensembl.h37.87.DEXSeq.chr.gff ______.sam exonCounts/______.txt
