@@ -14,14 +14,14 @@ NPC_norm <- read.csv('data/NPC_counts_normalized.csv', row.names = 1)
 gene_lists <- read_xlsx('data/GeneLists.xlsx', sheet = 'Other')
 
 # Choose gene subset
-genes_for_heatmap <- unlist(as.data.frame(gene_lists[,c("CellCycle")]),use.names=F)
+genes_for_heatmap <- unlist(as.data.frame(gene_lists[,c("RGC")]),use.names=F)
 genes_for_heatmap <- genes_for_heatmap[!is.na(genes_for_heatmap)]
 
 # Search for specific gene
 NEU_norm[grep('CIT',rownames(NEU_norm)),]
 
 # Choose Cell Type
-CELL_TYPE <- 'NEU'
+CELL_TYPE <- 'NPC'
 
 # Subset Matrix
 if(CELL_TYPE=='NPC'){
@@ -38,7 +38,7 @@ ComplexHeatmap::pheatmap(as.matrix(df_subset),
                          color = rev(RColorBrewer::brewer.pal(n =4, name = "RdYlBu")),
                          #color = inferno(256),
                          #color = colorRampPalette(c("navy", "white", "firebrick3"))(50),
-                         main = "CellCycle",
+                         main = "RGC Development",
                          cluster_rows=T, cluster_cols=FALSE,
                          column_names_side=c('top'), angle_col = c('45'),
                          row_names_side=c('left'),

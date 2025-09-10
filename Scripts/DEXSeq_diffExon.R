@@ -2,6 +2,8 @@ library(DEXSeq)
 library(tidyverse)
 library(ggplot2)
 
+PRR12_ID <- 'ENSG00000126464'
+CELL_TYPE <- 'NPC'
 
 # ------------------------------------------
 # Preparation
@@ -10,53 +12,78 @@ library(ggplot2)
 
 # Count Reads
 
-# Build DEXSeqDataSet
-dxd <- DEXSeqDataSetFromHTSeq()
-
 # ------------------------------------------
 # Read in Prepared Annotation and Counts
-countFiles = list.files(inDir, pattern="fb.txt$", full.names=TRUE)
-basename(countFiles)
-## [1] "treated1fb.txt" "treated2fb.txt" "treated3fb.txt" "untreated1fb.txt"
-## [5] "untreated2fb.txt" "untreated3fb.txt" "untreated4fb.txt"
-flattenedFile = list.files(inDir, pattern="gff$", full.names=TRUE)
-basename(flattenedFile)
+
+sample_info <- read.csv('data/sample_info.csv')
+sample_info$CellType <- factor(sample_info$cellType)
+sample_info$condition <- factor(sample_info$condition)
+
+count_files <- c('data/HTSeq_Counts/NEU_WT_1.count.txt','data/HTSeq_Counts/NEU_WT_2.count.txt','data/HTSeq_Counts/NEU_WT_3.count.txt','data/HTSeq_Counts/NEU_WT_4.count.txt',
+                 'data/HTSeq_Counts/NEU_HET_1.count.txt','data/HTSeq_Counts/NEU_HET_2.count.txt','data/HTSeq_Counts/NEU_HET_3.count.txt','data/HTSeq_Counts/NEU_HET_4.count.txt',
+                 'data/HTSeq_Counts/NEU_KO_1.count.txt','data/HTSeq_Counts/NEU_KO_2.count.txt','data/HTSeq_Counts/NEU_KO_3.count.txt','data/HTSeq_Counts/NEU_KO_4.count.txt',
+                 'data/HTSeq_Counts/NPC_WT_1.count.txt','data/HTSeq_Counts/NPC_WT_2.count.txt','data/HTSeq_Counts/NPC_WT_3.count.txt','data/HTSeq_Counts/NPC_WT_4.count.txt',
+                 'data/HTSeq_Counts/NPC_HET_1.count.txt','data/HTSeq_Counts/NPC_HET_2.count.txt','data/HTSeq_Counts/NPC_HET_3.count.txt','data/HTSeq_Counts/NPC_HET_4.count.txt',
+                 'data/HTSeq_Counts/NPC_KO_1.count.txt','data/HTSeq_Counts/NPC_KO_2.count.txt','data/HTSeq_Counts/NPC_KO_3.count.txt','data/HTSeq_Counts/NPC_KO_4.count.txt')
+
+if(CELL_TYPE == 'NEU'){
+  sample_info <- sample_info[1:12,]
+  count_files <- count_files[1:12]
+} else if(CELL_TYPE == 'NPC'){
+  sample_info <- sample_info[13:24,]
+  count_files <- count_files[13:24]
+}
+
 
 # ------------------------------------------
 # Standard Analysis Workflow
 
-sample_info <- read.csv('data/sample_info.csv')
-sample_info$CellType <- factor(sample_info$CellType)
-sample_info$Condition <- factor(sample_info$Condition)
+# Build DEXSeqDataSet
+dxd <- DEXSeqDataSetFromHTSeq(count_files, 
+                              sampleData = sample_info,
+                              design = ~ sampleName + exon + condition:exon,
+                              flattenedfile = 'data/ensembl.h37.87.DEXSeq.chr.gff')
 
-#Design taken for my DEseq script
-design = ~ Condition + CellType
+formulaFullModel    =  ~ sampleName + exon + condition:exon
+formulaReducedModel =  ~ sampleName + exon
 
-count_files <- c('data/HTSeq_Counts/_____',
-                 'and etcetera')
+# Processing
+dxd = estimateSizeFactors(dxd)
+
+gene_counts <- rowsum(featureCounts(dxd), group = geneIDs(dxd))
+keep_genes <- rowSums(gene_counts >= 2000) >= 8
+
+genes_to_keep <- names(keep_genes[keep_genes])
+keep <- geneIDs(dxd) %in% genes_to_keep
+
+dxd_filtered <- dxd[keep,]
+
+# dxd_filtered <- dxd[geneIDs(dxd)==PRR12_ID,]
+
+dxd_filtered = estimateDispersions(dxd_filtered)
+
+###### RData file saved from HERE (after estimateDispersions, before diff. exon usage calc)
+
+plotDispEsts(dxd_filtered)
+
+# Test for Differential Exon Usage
+dxd_filtered <- testForDEU(dxd_filtered)
+dxd_filtered <- estimateExonFoldChanges(dxd_filtered, fitExpToVar = "condition")
+results <- DEXSeqResults(dxd_filtered)
+
+###### _diffExp.RData file saved from HERE (after estimateDispersions, before diff. exon usage calc)
+
+plotDEXSeq(results, PRR12_ID, legend=TRUE, displayTranscripts = T, cex.axis=1.2, cex=1.3, lwd=2)
+plotDEXSeq(results, PRR12_ID, legend=TRUE, expression=F, norCounts=T, displayTranscripts = T, cex.axis=1.2, cex=1.3, lwd=2)
+
+
+
 
 
 
 # ------------------------------------------------------------------------------------
 #  BELOW is just copied from Simone's DEXSeq Analysis (obviously needs modification before use here)
 # ------------------------------------------------------------------------------------
-
-# Create DEXSeq object
-# Needed to remove quotation marks in .dexseq_count files (thanks to Arthur (@93355568) on bioconductor forums for solution)
-dxd <- DEXSeqDataSetFromHTSeq(
-  countfiles = count_files,  
-  sampleData = sample_info, 
-  design = ~ sample + exon + condition:exon,
-  flattenedfile = 'data/gencode.v31.basic.annotation.gff'
-)
-
-
-# Normalization
-dxd <- estimateSizeFactors(dxd)
-
-# Dispersion Estimation (of the negative binomial distribution)
-dxd <- estimateDispersions(dxd)
-#plotDispEsts(dxd)
 
 
 dxd <- testForDEU(dxd)

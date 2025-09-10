@@ -253,17 +253,21 @@ gseaplot(gse, by = "all", title = gse$Description[1], geneSetID = 1)
 
 
 
+# --------------------------------
+# Get data for use in Sankey Diagram
+# --------------------------------
 
+GO_TERM_OF_INTEREST <- 'chromosome separation'
+GO_TERM_OF_INTEREST <- 'double-strand break repair'
+GO_TERM_OF_INTEREST <- 'regulation of nuclear division'
+GO_TERM_OF_INTEREST <- 'nuclear division'
 
-
-
-
-
-
-
-
-
-
+gse@result[gse@result$Description==GO_TERM_OF_INTEREST,]
+# get gene list
+gse@result$core_enrichment[gse@result$Description==GO_TERM_OF_INTEREST]
+gene_list_all <- strsplit(gse@result$core_enrichment[gse@result$Description==GO_TERM_OF_INTEREST], split = '/')[[1]]
+gene_list_padj <- res_of_interest$padj[match(gene_list_all, res_of_interest$X)]
+gene_list_reduced <- gene_list_all[gene_list_padj < 0.05]
 
 
 

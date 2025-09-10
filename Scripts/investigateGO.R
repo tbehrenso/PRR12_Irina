@@ -11,9 +11,9 @@ NPC_norm <- read.csv('data/NPC_counts_normalized.csv', row.names = 1)
 
 
 
-go_name <- 'Double-strand break repair'
-go_id <- "GO:0043066"
-CELL_TYPE <- 'NEU'
+go_name <- 'Apoptotic Process'
+go_id <- "GO:0006915"
+CELL_TYPE <- 'NPC'
 
 entrez_ids <- AnnotationDbi::select(org.Hs.eg.db,
                                     keys = go_id,
@@ -32,6 +32,10 @@ if(CELL_TYPE=='NPC'){
   df_subset <- NEU_norm[genes_for_heatmap,]
 }
 
+# Use if there are rows with all ZEROS
+#df_subset <- df_subset[rowSums(df_subset)!=0,]
+
+df_subset <- df_subset[1:60,]
 
 ComplexHeatmap::pheatmap(as.matrix(df_subset),
                          scale = "row",
@@ -51,7 +55,7 @@ ComplexHeatmap::pheatmap(as.matrix(df_subset),
 # -----------------------------------------------
 
 # Load DEGs
-DEGS_KO_vs_WT <- read.csv('Results/DEGs/DEGs_NEU_KO_vs_WT.csv', row.names = 1)
+DEGS_KO_vs_WT <- read.csv('Results/DEGs/DEGs_NPC_vs_WT.csv', row.names = 1)
 
 GO_DEGs <- DEGS_KO_vs_WT[genes_of_go,c('log2FoldChange','padj')]
 
