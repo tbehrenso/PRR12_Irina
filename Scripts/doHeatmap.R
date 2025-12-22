@@ -2,6 +2,7 @@ library(pheatmap)
 library(tidyverse)
 library(dplyr)
 library(readxl)
+source('Scripts/PRR12_Functions.R')
 
 # Load Data
 NEU_vst <- read.csv('data/NEU_heatmap_vst.csv', row.names = 1)
@@ -14,22 +15,28 @@ NPC_norm <- read.csv('data/NPC_counts_normalized.csv', row.names = 1)
 gene_lists <- read_xlsx('data/GeneLists.xlsx', sheet = 'Other')
 
 # Choose gene subset
-genes_for_heatmap <- unlist(as.data.frame(gene_lists[,c("RGC")]),use.names=F)
+genes_for_heatmap <- unlist(as.data.frame(gene_lists[,c("Imprinted")]),use.names=F)
 genes_for_heatmap <- genes_for_heatmap[!is.na(genes_for_heatmap)]
 
 # Search for specific gene
 NEU_norm[grep('CIT',rownames(NEU_norm)),]
 
 # Choose Cell Type
-CELL_TYPE <- 'NPC'
+CELL_TYPE <- 'NEU'
 
 # Subset Matrix
 if(CELL_TYPE=='NPC'){
   genes_for_heatmap <- genes_for_heatmap[genes_for_heatmap %in% rownames(NPC_norm)]
   df_subset <- NPC_norm[genes_for_heatmap,]
+  
+  rownames(df_subset) <- asterisk_sig_genes(rownames(df_subset), res_NPC_KO_vs_WT$X, res_NPC_KO_vs_WT$padj)
+  rownames(df_subset) <- asterisk_sig_genes(rownames(df_subset), res_NPC_HET_vs_WT$X, res_NPC_HET_vs_WT$padj)
 } else if (CELL_TYPE=='NEU'){
   genes_for_heatmap <- genes_for_heatmap[genes_for_heatmap %in% rownames(NEU_norm)]
   df_subset <- NEU_norm[genes_for_heatmap,]
+  
+  rownames(df_subset) <- asterisk_sig_genes(rownames(df_subset), res_NEU_KO_vs_WT$X, res_NEU_KO_vs_WT$padj)
+  rownames(df_subset) <- asterisk_sig_genes(rownames(df_subset), res_NEU_HET_vs_WT$X, res_NEU_HET_vs_WT$padj)
 }
 
 
@@ -38,7 +45,7 @@ ComplexHeatmap::pheatmap(as.matrix(df_subset),
                          color = rev(RColorBrewer::brewer.pal(n =4, name = "RdYlBu")),
                          #color = inferno(256),
                          #color = colorRampPalette(c("navy", "white", "firebrick3"))(50),
-                         main = "RGC Development",
+                         main = "Imprinted Genes",
                          cluster_rows=T, cluster_cols=FALSE,
                          column_names_side=c('top'), angle_col = c('45'),
                          row_names_side=c('left'),

@@ -10,3 +10,5 @@ data
 *.xlsx
 *.html
 *.Rproj
+*.pdf
+*.docx

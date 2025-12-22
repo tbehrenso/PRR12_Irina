@@ -9,7 +9,7 @@ raw_count_import <- read.delim('data/irina.all.counts.trimmed.tsv')
 
 # Create count matrix
 raw_count_matrix <- raw_count_import |> 
-  select(paste(rep(c('NEU','NPC'),each=12), rep(c('WT','HET','KO'),each=4), c(1:4),sep = '_')) |> 
+  dplyr::select(paste(rep(c('NEU','NPC'),each=12), rep(c('WT','HET','KO'),each=4), c(1:4),sep = '_')) |> 
   as.matrix()
 rownames(raw_count_matrix) <- raw_count_import$Geneid
   
@@ -84,7 +84,7 @@ if(CELL_TYPE == 'BOTH'){
   res_KO_WT <- results(dds, contrast=c('Condition','KO','WT'))
   
 } else {
-  dds <- DESeqDataSetFromMatrix(countData = as.matrix(select(as.data.frame(raw_count_matrix), contains(CELL_TYPE))),
+  dds <- DESeqDataSetFromMatrix(countData = as.matrix(dplyr::select(as.data.frame(raw_count_matrix), contains(CELL_TYPE))),
                                 colData = sample_info[`if`(CELL_TYPE=='NEU', c(1:12), c(13:24)),],
                                 design = ~ Condition)
   dds$Condition <- factor(dds$Condition, levels = c('WT','HET','KO'))
@@ -109,7 +109,7 @@ EnhancedVolcano(res_KO_WT,
                 subtitle = NULL)
 
 # Plot gene
-GENE_OF_INTEREST <- 'BCL2L11'
+GENE_OF_INTEREST <- 'NTRK3'
 
 plot_data <- plotCounts(dds, gene=GENE_OF_INTEREST, intgroup=c("Condition",'CellType'), 
                 returnData=TRUE)
@@ -148,7 +148,7 @@ res_NPC_HET_vs_WT <- read.csv('Results/DEGs/DEGs_NPC_HET_vs_WT.csv')
 res_NPC_KO_vs_WT <- read.csv('Results/DEGs/DEGs_NPC_KO_vs_WT.csv')
 
 
-CELL_TYPE <- 'NEU'
+CELL_TYPE <- 'NPC'
 MUTANT_TYPE <- 'KO'
 REG_DIRECTION <- 'UP'
 
