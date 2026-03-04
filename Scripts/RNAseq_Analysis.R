@@ -71,7 +71,7 @@ ggplot(mean_var_df, aes(x = mean, y = variance)) +
 # DEG analysis
 # -----------------------------------------
 
-CELL_TYPE <- 'NEU'
+CELL_TYPE <- 'NPC'
 
 # Create DESeq object
 if(CELL_TYPE == 'BOTH'){
