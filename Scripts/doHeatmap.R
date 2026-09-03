@@ -11,18 +11,22 @@ NPC_vst <- read.csv('data/NPC_heatmap_vst.csv', row.names = 1)
 NEU_norm <- read.csv('data/NEU_counts_normalized.csv', row.names = 1)
 NPC_norm <- read.csv('data/NPC_counts_normalized.csv', row.names = 1)
 
+res_NPC_KO_vs_WT <- read.csv('Results/DEGs/DEGs_NPC_KO_vs_WT.csv')
+res_NPC_HET_vs_WT <- read.csv('Results/DEGs/DEGs_NPC_HET_vs_WT.csv')
+
 # Get Gene List
 gene_lists <- read_xlsx('data/GeneLists.xlsx', sheet = 'Other')
 
 # Choose gene subset
 genes_for_heatmap <- unlist(as.data.frame(gene_lists[,c("IGF_MoreMore")]),use.names=F)
 genes_for_heatmap <- genes_for_heatmap[!is.na(genes_for_heatmap)]
+genes_for_heatmap <- c('NFIA','FGF9','ZIC2','BCL11A','MARCKS','NFIB','USP9X','SHB', 'PRR12')
 
 # Search for specific gene
 NEU_norm[grep('IGF',rownames(NEU_norm)),]
 
 # Choose Cell Type
-CELL_TYPE <- 'NEU'
+CELL_TYPE <- 'NPC'
 
 # Subset Matrix
 if(CELL_TYPE=='NPC'){
@@ -39,6 +43,7 @@ if(CELL_TYPE=='NPC'){
   rownames(df_subset) <- asterisk_sig_genes(rownames(df_subset), res_NEU_HET_vs_WT$X, res_NEU_HET_vs_WT$padj)
 }
 
+#df_subset <- select(df_subset, -contains('HET'))
 
 ComplexHeatmap::pheatmap(as.matrix(df_subset),
                          scale = "row",
@@ -46,11 +51,13 @@ ComplexHeatmap::pheatmap(as.matrix(df_subset),
                          #color = inferno(256),
                          #color = colorRampPalette(c("navy", "white", "firebrick3"))(50),
                          main = "IGF Pathway",
-                         cluster_rows=T, cluster_cols=FALSE,
+                         cluster_rows=F, cluster_cols=FALSE,
                          column_names_side=c('top'), angle_col = c('45'),
                          row_names_side=c('left'),
                          heatmap_legend_param = list(title = NULL)
 )
+
+
 
 # Heatmap with ggplot
 dea_counts_subset_scaled <- t(scale(t(dea_counts_subset)))

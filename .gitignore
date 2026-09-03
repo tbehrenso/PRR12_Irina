@@ -3,6 +3,7 @@
 Results
 data
 
+
 *.pptx
 *.png
 *.csv
@@ -12,3 +13,5 @@ data
 *.Rproj
 *.pdf
 *.docx
+*.fa.*
+*.fa

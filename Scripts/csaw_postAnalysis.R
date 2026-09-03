@@ -225,7 +225,9 @@ h3k9me3_peak_and_NPC_sig_down <- intersect(h3k9me3_peakAnno@anno$SYMBOL, NPC_KO_
 
 h3k9me3_peak_upKO_and_NPC_sig_down <- intersect(h3k9me3_peakAnno@anno$SYMBOL[h3k9me3_peakAnno@anno$direction=='up'], NPC_KO_WT_sig_genes_down)
 h3k9me3_peak_downKO_and_NPC_sig_up <- intersect(h3k9me3_peakAnno@anno$SYMBOL[h3k9me3_peakAnno@anno$direction=='down'], NPC_KO_WT_sig_genes_up)
-
+#next two theoretically in wrong direction
+h3k9me3_peak_upKO_and_NPC_sig_up <- intersect(h3k9me3_peakAnno@anno$SYMBOL[h3k9me3_peakAnno@anno$direction=='up'], NPC_KO_WT_sig_genes_up)
+h3k9me3_peak_downKO_and_NPC_sig_down <- intersect(h3k9me3_peakAnno@anno$SYMBOL[h3k9me3_peakAnno@anno$direction=='down'], NPC_KO_WT_sig_genes_down)
 
 ego <- enrichGO(
   gene          = h3k9me3_peak_upKO_and_NPC_sig_down,
